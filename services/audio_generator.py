@@ -7,7 +7,6 @@ load_dotenv()
 
 ELEVEN_API_KEY = os.getenv("API_SECRET_KEY")
 
-# Define your audio file path and ensure the folder exists
 AUDIO_PATH = "static/audio/story.mp3"
 os.makedirs("static/audio", exist_ok=True)
 
@@ -15,7 +14,7 @@ client = ElevenLabs(api_key=ELEVEN_API_KEY)
 
 def generate_audio_from_text(story_text):
     try:
-        voice_uid = "EXAVITQu4vr4xnSDxMaL"  # Adjust to your preferred voice UID
+        voice_uid = "EXAVITQu4vr4xnSDxMaL"  
         audio_generator = client.text_to_speech.convert(
             text=story_text,
             voice_id=voice_uid,

@@ -12,12 +12,10 @@ def generate_av():
 
     story_text = data["text"]
 
-    # Generate audio from text
     success, audio_result = generate_audio_from_text(story_text)
     if not success:
         return jsonify({"error": "Audio generation failed", "detail": audio_result}), 500
 
-    # Generate video with dynamic text overlay
     success, video_result = generate_video_with_dynamic_text(story_text)
     if not success:
         return jsonify({"error": "Video generation failed", "detail": video_result}), 500

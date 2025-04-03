@@ -10,17 +10,14 @@ os.makedirs("static/video", exist_ok=True)
 
 def generate_video_with_dynamic_text(story_text):
     try:
-        # Load the generated audio
         audio_clip = AudioFileClip("static/audio/story.mp3")
         duration = audio_clip.duration
 
-        # Create a black background clip
         background_clip = ColorClip(size=(1280, 720), color=(0, 0, 0), duration=duration)
 
-        # **Sentence-wise processing**
         sentences = story_text.split(". ")
         num_sentences = len(sentences)
-        sentence_duration = duration / num_sentences  # Equal duration per sentence
+        sentence_duration = duration / num_sentences 
 
         text_clips = []
         for i, sentence in enumerate(sentences):
@@ -37,10 +34,8 @@ def generate_video_with_dynamic_text(story_text):
 
             text_clips.append(txt_clip)
 
-        # Merge all clips
         final_clip = CompositeVideoClip([background_clip.set_audio(audio_clip)] + text_clips)
 
-        # Export video
         final_clip.write_videofile(VIDEO_OUTPUT_PATH, fps=24)
         return True, VIDEO_OUTPUT_PATH
 
