@@ -5,7 +5,6 @@ import librosa
 
 
 load_dotenv()
-imagemagick_path = os.getenv("IMAGEMAGICK_BINARY")
 
 VIDEO_OUTPUT_PATH = "static/video/story_video.mp4"
 VIDEO_PATH = "static/video/base_video.mp4"  
