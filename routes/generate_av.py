@@ -14,23 +14,18 @@ def generate_av():
 
     story_text = data["text"]
 
-    # 🔹 **Step 1: Audio Generate karo**
     success, audio_result = generate_audio_from_text(story_text)
     if not success:
         return jsonify({"error": "Audio generation failed", "detail": audio_result}), 500
 
-    # 🔹 **Step 2: Video Generate karo**
     success, final_video_result = generate_video_with_dynamic_text(story_text)
     if not success:
         return jsonify({"error": "Video generation failed", "detail": final_video_result}), 500
 
-    # 🔹 **Step 3: Audio ko Cloudinary pe Upload karo**
     audio_url = upload_to_cloudinary(audio_result, folder="audio")
 
-    # 🔹 **Step 4: Video ko Cloudinary pe Upload karo**
     video_url = upload_to_cloudinary(final_video_result, folder="video")
 
-    # 🔹 **Step 5: MongoDB me Save karo**
     video_id = Video.save_video(audio_url, video_url, story_text)
 
     return jsonify({

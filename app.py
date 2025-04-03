@@ -4,15 +4,12 @@ from routes.generate_av import generate_av_bp
 
 app = Flask(__name__)
 
-# ✅ MongoDB Connection String (Update if needed)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Video"
 mongo = PyMongo(app)
 
-# ✅ Video Model ko MongoDB se Connect Karein
 from models.video import Video  
 Video.collection = mongo.db["Generated-Video"]
 
-# ✅ Blueprint Register Karein
 app.register_blueprint(generate_av_bp)
 
 if __name__ == '__main__':

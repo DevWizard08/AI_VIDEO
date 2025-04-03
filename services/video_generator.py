@@ -22,8 +22,8 @@ def get_sentence_durations(audio_path, sentences):
     start_time = 0
 
     for sentence in sentences:
-        sentence_words = len(sentence.split())  # Sentence me kitne words hain
-        sentence_duration = sentence_words * avg_word_duration  # Uska duration
+        sentence_words = len(sentence.split())  
+        sentence_duration = sentence_words * avg_word_duration  
         durations.append((sentence, start_time, sentence_duration))
         start_time += sentence_duration
 
