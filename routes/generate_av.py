@@ -11,27 +11,31 @@ def generate_av():
     data = request.get_json()
 
     story_text = data.get("text")
-    background_video_url = data.get("video_url")  # background video
+    background_video_url = data.get("video_url")
     voice_id = data.get("voice_id")
 
     if not story_text or not voice_id:
         return jsonify({"error": "Please provide both 'text' and 'voice_id' in the JSON payload"}), 400
 
-    # 1. Generate Audio from dynamic voice
+    # 1. Generate Audio from ElevenLabs
     success, audio_result = generate_audio_from_text(story_text, voice_id)
     if not success:
         return jsonify({"error": "Audio generation failed", "detail": audio_result}), 500
 
-    # 2. Generate Video using background video and story
-    success, final_video_result = generate_video_with_dynamic_text(story_text, background_video_url)
+    # 2. Read audio bytes
+    with open(audio_result, "rb") as f:
+        audio_bytes = f.read()
+
+    # 3. Generate video
+    success, final_video_result = generate_video_with_dynamic_text(story_text, background_video_url, audio_bytes)
     if not success:
         return jsonify({"error": "Video generation failed", "detail": final_video_result}), 500
 
-    # 3. Upload audio and video to Cloudinary
+    # 4. Upload to Cloudinary
     audio_url = upload_to_cloudinary(audio_result, folder="audio")
     video_url = upload_to_cloudinary(final_video_result, folder="video")
 
-    # 4. Save the generated video metadata
+    # 5. Save metadata
     video_id = GeneratedVideo.save_video(audio_url, video_url, story_text)
 
     return jsonify({
