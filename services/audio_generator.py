@@ -12,9 +12,9 @@ os.makedirs("static/audio", exist_ok=True)
 
 client = ElevenLabs(api_key=ELEVEN_API_KEY)
 
-def generate_audio_from_text(story_text):
+def generate_audio_from_text(story_text,voice_uid):
     try:
-        voice_uid = "EXAVITQu4vr4xnSDxMaL"  
+         
         audio_generator = client.text_to_speech.convert(
             text=story_text,
             voice_id=voice_uid,

@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from moviepy.editor import AudioFileClip, ColorClip, CompositeVideoClip, TextClip,VideoFileClip,concatenate_videoclips 
 import librosa
+import requests
 
 
 load_dotenv()
@@ -13,6 +14,14 @@ VIDEO_PATH = "static/video/base_video.mp4"
 AUDIO_PATH = "static/audio/story.mp3"       
 
 os.makedirs("static/video", exist_ok=True)
+
+
+def download_video_from_url(url, save_path):
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(save_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
 
 def get_sentence_durations(audio_path, sentences):
     audio_duration = librosa.get_duration(path=audio_path) 
@@ -36,9 +45,11 @@ def get_sentence_durations(audio_path, sentences):
 
 
 
-def generate_video_with_dynamic_text(story_text):
+def generate_video_with_dynamic_text(story_text, video_url):
     try:
-        original_video = VideoFileClip(VIDEO_PATH).without_audio()
+        downloaded_video_path = "static/video/temp_downloaded_video.mp4"
+        download_video_from_url(video_url, downloaded_video_path)
+        original_video = VideoFileClip(downloaded_video_path).without_audio()
         original_duration = original_video.duration
         video_width, video_height = original_video.size  
 
