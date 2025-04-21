@@ -2,10 +2,13 @@
 
 from flask import Blueprint, jsonify
 from models.background_video import BackgroundVideo  # ✅ Correct import
+from flask_jwt_extended import jwt_required
+
 
 get_background_url_bp = Blueprint("get_background_url", __name__)
 
 @get_background_url_bp.route("/api/get-latest-background-url", methods=["GET"])
+@jwt_required()
 def get_latest_background_url():
     latest_video = BackgroundVideo.collection.find_one(
         sort=[("_id", -1)]  # Sort by insertion order (ObjectId)

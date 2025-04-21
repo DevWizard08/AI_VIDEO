@@ -1,5 +1,11 @@
 from flask import Flask
 from flask_pymongo import PyMongo
+from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 
 # Blueprints
 from routes.generate_av import generate_av_bp
@@ -7,15 +13,23 @@ from routes.upload_background import upload_bg
 from routes.get_background_url import get_background_url_bp
 from routes.list_videos import list_videos_bp
 from routes.get_voices import get_voices_bp
+from routes.free_video import free_video_bp
+from routes.auth import auth_bp
+
 
 
 # Models
 from models.generated_video import GeneratedVideo
 from models.background_video import BackgroundVideo
+from models.user import User
+
 
 import config
 
 app = Flask(__name__)
+
+app.config["JWT_SECRET_KEY"] =  os.getenv("JWT_SECRET_KEY")
+jwt = JWTManager(app)
 
 # MongoDB config
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Video"
@@ -24,11 +38,12 @@ mongo = PyMongo(app)
 # Set collection
 GeneratedVideo.collection = mongo.db["Generated-Video"]
 BackgroundVideo.collection = mongo.db["Background-Video"]
+User.collection             = mongo.db["users"]
+
 
 # Register routes
-app.register_blueprint(generate_av_bp)
-app.register_blueprint(upload_bg)
-app.register_blueprint(get_background_url_bp)
+app.register_blueprint(free_video_bp)
+app.register_blueprint(auth_bp)
 app.register_blueprint(list_videos_bp)
 app.register_blueprint(get_voices_bp)
 
