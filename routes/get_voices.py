@@ -3,6 +3,8 @@ from flask import Blueprint, jsonify
 from elevenlabs.client import ElevenLabs
 import os
 from dotenv import load_dotenv
+from flask_jwt_extended import jwt_required
+
 
 load_dotenv()
 
@@ -10,6 +12,7 @@ get_voices_bp = Blueprint("get_voices_bp", __name__)
 client = ElevenLabs(api_key=os.getenv("API_SECRET_KEY"))
 
 @get_voices_bp.route("/api/get-voices", methods=["GET"])
+@jwt_required()
 def get_voices():
     try:
         voices_response = client.voices.get_all()

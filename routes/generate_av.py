@@ -3,10 +3,13 @@ from services.audio_generator import generate_audio_from_text
 from services.video_generator import generate_video_with_dynamic_text
 from services.upload import upload_to_cloudinary
 from models.generated_video import GeneratedVideo
+from flask_jwt_extended import jwt_required
+
 
 generate_av_bp = Blueprint('generate_av', __name__)
 
 @generate_av_bp.route('/generate-av', methods=['POST'])
+@jwt_required()
 def generate_av():
     data = request.get_json()
 
