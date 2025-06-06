@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sv129899/sanjeev:latest 
+    container_name: sanjeev
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env

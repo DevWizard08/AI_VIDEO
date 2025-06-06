@@ -28,4 +28,4 @@ ENV FLASK_ENV=production
 EXPOSE 5000
 
 # 8. Start server
-CMD ["flask", "run"]
+CMD ["python", "app.py"]
