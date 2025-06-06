@@ -35,7 +35,7 @@ app.config["JWT_SECRET_KEY"] =  os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
 # MongoDB config
-app.config["MONGO_URI"] = "mongodb://localhost:27017/Video"
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 
 # Set collection
