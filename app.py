@@ -3,6 +3,8 @@ from flask_pymongo import PyMongo
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
+
 
 load_dotenv()
 
@@ -32,6 +34,16 @@ def index():
     return "Welcome to the Video API!"
 
 app.config["JWT_SECRET_KEY"] =  os.getenv("JWT_SECRET_KEY")
+raw_access_expires = os.getenv("JWT_ACCESS_TOKEN_EXPIRES", "0")
+if raw_access_expires.endswith("d"):
+    days = int(raw_access_expires[:-1])
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=days)
+else:
+    try:
+        seconds = int(raw_access_expires)
+        app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=seconds)
+    except ValueError:
+        app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
 jwt = JWTManager(app)
 
 # MongoDB config
