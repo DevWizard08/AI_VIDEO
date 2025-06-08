@@ -1,7 +1,7 @@
 # 1. Base image
 FROM python:3.11-slim
 
-# 2. System deps: ImageMagick, pip, alias 'python', plus fontconfig and wget
+# 2. System deps
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        imagemagick \
@@ -9,9 +9,13 @@ RUN apt-get update \
        python-is-python3 \
        fontconfig \
        wget \
+       git \
+       ffmpeg \
+       espeak-ng \
+       libespeak-ng-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Remove ImageMagick security-policy lines that block "@*" (and MVG/TXT) so TextClip works
+# 3. Fix ImageMagick policies
 RUN for f in /etc/ImageMagick-*/policy.xml; do \
       if [ -f "$f" ]; then \
         sed -i '/<policy domain="path" rights="none" pattern="@\*"\/>/d' "$f"; \
@@ -20,31 +24,38 @@ RUN for f in /etc/ImageMagick-*/policy.xml; do \
       fi; \
     done
 
-# 4. Download Leelawadee UI Bold from a public GitHub repo and install into system fonts
-#    (this comes from streetsamurai00mi/ttf-ms-win10, which bundles Windows 10 fonts in a Linux-friendly repo) :contentReference[oaicite:0]{index=0}
+# 4. Install font
 RUN wget -qO /usr/share/fonts/truetype/LeelawadeeUI-Bold.ttf \
       https://raw.githubusercontent.com/streetsamurai00mi/ttf-ms-win10/build/LeelaUIb.ttf
-
-# 5. Rebuild font cache so ImageMagick can find Leelawadee UI Bold
 RUN fc-cache -f -v
 
-# 6. Set working dir
+# 5. Set working dir
 WORKDIR /app
 
-# 7. Install Python deps
+# 6. Copy and install Python deps
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 8. Copy app code
+# 7. Install Coqui TTS + server
+RUN pip install TTS==0.22.0
+
+# 8. Download and cache a model (optional but smart)
+RUN python3 -c "from TTS.utils.manage import ModelManager; ModelManager().download_model('tts_models/en/ljspeech/tacotron2-DDC')"
+
+# 9. Copy app files
 COPY . .
 
-# 9. Flask env defaults
+# 10. Copy start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# 11. Environment
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=production
 
-# 10. Expose port
+# 12. Expose port
 EXPOSE 5000
 
-# 11. Start server
-CMD ["python", "app.py"]
+# 13. Start both services
+CMD ["/start.sh"]

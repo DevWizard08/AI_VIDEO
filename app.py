@@ -61,6 +61,8 @@ app.register_blueprint(free_video_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(list_videos_bp)
 app.register_blueprint(get_voices_bp)
+app.register_blueprint(generate_av_bp)
+
 
 
 if __name__ == '__main__':
