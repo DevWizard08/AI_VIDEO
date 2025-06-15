@@ -1,15 +1,11 @@
 import os
 import tempfile
-from dotenv import load_dotenv
 from moviepy.editor import (
     AudioFileClip, CompositeVideoClip, TextClip,
     VideoFileClip, concatenate_videoclips
 )
 import librosa
 import requests
-
-load_dotenv()
-imagemagick_path = os.getenv("IMAGEMAGICK_BINARY")
 
 
 def download_video_from_url(url, save_path):
@@ -39,27 +35,27 @@ def get_sentence_durations(audio_path, sentences):
 
 def generate_video_with_dynamic_text(story_text, video_url, tts_audio_bytes):
     try:
-        # Temporary files
+        # Setup temp files
         temp_dir = tempfile.gettempdir()
         downloaded_video_path = os.path.join(temp_dir, "base_video.mp4")
         audio_path = os.path.join(temp_dir, "story.mp3")
         output_video_path = os.path.join(temp_dir, "story_video.mp4")
 
-        # Save TTS audio to temp audio path
+        # Save audio
         with open(audio_path, "wb") as f:
             f.write(tts_audio_bytes)
 
-        # Download video from provided URL
+        # Download background video
         download_video_from_url(video_url, downloaded_video_path)
 
-        # Load video and audio
+        # Load video/audio
         original_video = VideoFileClip(downloaded_video_path).without_audio()
         audio_clip = AudioFileClip(audio_path)
         audio_duration = audio_clip.duration
         original_duration = original_video.duration
         video_width, video_height = original_video.size
 
-        # Repeat or trim video to match audio duration
+        # Match video length to audio
         if audio_duration > original_duration:
             num_repeats = int(audio_duration // original_duration) + 1
             repeated_clips = [original_video] * num_repeats
@@ -67,23 +63,30 @@ def generate_video_with_dynamic_text(story_text, video_url, tts_audio_bytes):
         else:
             video_clip = original_video.subclip(0, audio_duration)
 
-        # Generate text overlay
+        # Sync text with audio
         font_size = int(video_width * 0.05)
         text_width = int(video_width * 0.9)
-        sentences = story_text.split(". ")
+        sentences = [s.strip() for s in story_text.split(". ") if s.strip()]
         sentence_timings = get_sentence_durations(audio_path, sentences)
 
         text_clips = [
-            TextClip(sentence, fontsize=font_size, color='white', font="Leelawadee-UI-Bold", method='caption', size=(text_width, None))
+            TextClip(
+                sentence,
+                fontsize=font_size,
+                color='white',
+                font="Arial",  # or "Leelawadee-UI-Bold"
+                method='caption',
+                size=(text_width, None)
+            )
             .set_start(start)
             .set_duration(duration)
-            .set_position(("center", video_height * 0.8))
-            .fadein(0.5)
-            .fadeout(0.5)
+            .set_position(("center", video_height * 0.8))  # bottom-ish
+            .fadein(0.3)
+            .fadeout(0.3)
             for sentence, start, duration in sentence_timings
         ]
 
-        # Compose final video
+        # Final video
         final_clip = CompositeVideoClip([video_clip] + text_clips).set_audio(audio_clip)
         final_clip.write_videofile(output_video_path, fps=24)
 
