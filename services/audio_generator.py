@@ -1,5 +1,5 @@
 import os
-import tempfile
+import io
 from dotenv import load_dotenv
 from elevenlabs.client import ElevenLabs
 
@@ -17,17 +17,13 @@ def generate_audio_from_text(story_text, voice_uid):
             optimize_streaming_latency=1,
             output_format="mp3_44100_128"
         )
-        
-        # ✅ Create a temp file path for audio
-        temp_dir = tempfile.gettempdir()
-        temp_audio_path = os.path.join(temp_dir, "story_audio_temp.mp3")
 
-        # ✅ Save audio to this path
+        # Collect bytes and return BytesIO object
         audio_bytes = b"".join(audio_generator)
-        with open(temp_audio_path, "wb") as f:
-            f.write(audio_bytes)
+        audio_buffer = io.BytesIO(audio_bytes)
+        audio_buffer.seek(0)
 
-        return True, temp_audio_path
+        return True, audio_buffer
 
     except Exception as e:
         return False, str(e)
